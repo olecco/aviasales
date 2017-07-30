@@ -10,7 +10,6 @@
         android:id="@+id/cityFrom"
         style="@style/EditTextStyle"
         android:hint="@string/from"
-        android:text="moscow"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -23,7 +22,6 @@
         style="@style/EditTextStyle"
         android:layout_marginTop="30dp"
         android:hint="@string/to"
-        android:text="odessa"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cityFrom" />

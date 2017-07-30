@@ -5,6 +5,7 @@ import android.graphics.PathMeasure;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -111,7 +112,9 @@ public class ShowMapFragment extends MapFragment implements OnMapReadyCallback {
 
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(locationBounds, 100));
 
-        preparePlanePath();
+        if (!fromLocation.equals(toLocation)) {
+            preparePlanePath();
+        }
     }
 
     private void preparePlanePath() {
@@ -164,6 +167,7 @@ public class ShowMapFragment extends MapFragment implements OnMapReadyCallback {
         float yDiff = Math.abs(startPoint.y - endPoint.y);
 
         if (xDiff <= yDiff) {
+            xDiff = Math.max(xDiff, 300);
             path.cubicTo(
                     startPoint.x <= endPoint.x ? startPoint.x + xDiff : startPoint.x - xDiff,
                     startPoint.y,
@@ -172,6 +176,7 @@ public class ShowMapFragment extends MapFragment implements OnMapReadyCallback {
                     endPoint.x,
                     endPoint.y);
         } else {
+            yDiff = Math.max(yDiff, 300);
             path.cubicTo(
                     startPoint.x,
                     startPoint.y <= endPoint.y ? startPoint.y + yDiff : startPoint.y - yDiff,

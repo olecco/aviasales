@@ -19,6 +19,8 @@ public class PlaneAnimator {
         void onPlanePositionUpdate(LatLng position, float angle);
     }
 
+    private static final int ANIMATION_STEP_DURATION = 500;
+
     private PlaneAnimatorListener planeAnimatorListener;
 
     private List<LatLng> pathPoints = new ArrayList<>();
@@ -33,7 +35,7 @@ public class PlaneAnimator {
         @Override
         public void run() {
             long elapsedTime = SystemClock.uptimeMillis() - startTime;
-            double fraction = interpolator.getInterpolation((float) elapsedTime / 500);
+            double fraction = interpolator.getInterpolation((float) elapsedTime / ANIMATION_STEP_DURATION);
 
             double lat = fraction * getAnimEnd().latitude + (1 - fraction) * getAnimStart().latitude;
             double lng = fraction * getAnimEnd().longitude + (1 - fraction) * getAnimStart().longitude;
