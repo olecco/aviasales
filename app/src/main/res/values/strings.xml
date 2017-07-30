@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Aviasales</string>
-    <string name="search">SEARCH</string>
+    <string name="search">Search</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="input_from">Input \'from\' location</string>
+    <string name="input_to">Input \'to\' location</string>
 </resources>

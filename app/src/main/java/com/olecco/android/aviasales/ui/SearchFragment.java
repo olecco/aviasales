@@ -1,30 +1,25 @@
 package com.olecco.android.aviasales.ui;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.olecco.android.aviasales.AviasalesApplication;
 import com.olecco.android.aviasales.R;
 import com.olecco.android.aviasales.api.ApiClient;
 import com.olecco.android.aviasales.api.ApiResponseConverter;
 import com.olecco.android.aviasales.model.ApiResponse;
-import com.olecco.android.aviasales.model.City;
-import com.olecco.android.aviasales.model.CityPair;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiFunction;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class SearchFragment extends Fragment {
@@ -36,13 +31,6 @@ public class SearchFragment extends Fragment {
     private Button searchButton;
     private Disposable requestDisposable;
     private UIRouter uiRouter;
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        uiRouter = (UIRouter) activity;
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -64,12 +52,9 @@ public class SearchFragment extends Fragment {
         cityToEdit = (EditText) view.findViewById(R.id.cityTo);
 
         searchButton = (Button) view.findViewById(R.id.search);
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String cityFrom = cityFromEdit.getText().toString();
-                String cityTo = cityToEdit.getText().toString();
-                startSearch(cityFrom, cityTo);
+        searchButton.setOnClickListener(v -> {
+            if (validateInput()) {
+                startSearch(getCityFrom(), getCityTo());
             }
         });
 
@@ -94,48 +79,43 @@ public class SearchFragment extends Fragment {
     }
 
     private void startSearch(String cityFrom, String cityTo) {
-
         Observable<ApiResponse> cityFromData = getApiClient().loadCityData(cityFrom, "ru");
         Observable<ApiResponse> cityToData = getApiClient().loadCityData(cityTo, "ru");
 
-
-        requestDisposable = Observable.zip(cityFromData, cityToData, new BiFunction<ApiResponse, ApiResponse, CityPair>() {
-
-            @Override
-            public CityPair apply(@NonNull ApiResponse apiResponse1, @NonNull ApiResponse apiResponse2) throws Exception {
-
-
-                City cityFrom = ApiResponseConverter.getCityFromResponse(apiResponse1);
-                City cityTo = ApiResponseConverter.getCityFromResponse(apiResponse2);
-
-                if (cityFrom != null && cityTo != null) {
-                    return new CityPair(cityFrom, cityTo);
-                }
-
-
-                return null;
-            }
-        }).subscribeOn(Schedulers.io())
+        requestDisposable = Observable
+                .zip(cityFromData, cityToData, ApiResponseConverter::getCityPair)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<CityPair>() {
+                .subscribe(cityPair -> uiRouter.showMap(cityPair),
+                           throwable -> showError(throwable.getMessage()));
+    }
 
-                    @Override
-                    public void accept(@NonNull CityPair cityPair) throws Exception {
+    private boolean validateInput() {
+        if (TextUtils.isEmpty(getCityFrom())) {
+            showError(getString(R.string.input_from));
+            cityFromEdit.requestFocus();
+            return false;
+        }
 
-                        City city = cityPair.getCityFrom();
-                        Log.d("111", "cityFrom: " + city.getFullName() + " : " + city.getCoordinates().getLat() + " : " +
-                                city.getCoordinates().getLon());
+        if (TextUtils.isEmpty(getCityTo())) {
+            showError(getString(R.string.input_to));
+            cityToEdit.requestFocus();
+            return false;
+        }
 
-                        city = cityPair.getCityTo();
-                        Log.d("111", "cityTo: " + city.getFullName() + " : " + city.getCoordinates().getLat() + " : " +
-                                city.getCoordinates().getLon());
+        return true;
+    }
 
-                        uiRouter.showMap(cityPair);
+    private void showError(String string) {
+        Toast.makeText(getActivity(), string, Toast.LENGTH_SHORT).show();
+    }
 
-                    }
-                });
+    private String getCityFrom() {
+        return cityFromEdit.getText().toString().trim();
+    }
 
-
+    private String getCityTo() {
+        return cityToEdit.getText().toString().trim();
     }
 
     private ApiClient getApiClient() {

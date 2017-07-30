@@ -6,9 +6,8 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 
 import com.olecco.android.aviasales.R;
-import com.olecco.android.aviasales.model.City;
 import com.olecco.android.aviasales.model.CityPair;
-import com.olecco.android.aviasales.ui.map.MapFragment;
+import com.olecco.android.aviasales.ui.map.ShowMapFragment;
 
 public class MainActivity extends Activity implements UIRouter {
 
@@ -36,7 +35,7 @@ public class MainActivity extends Activity implements UIRouter {
 
     @Override
     public void showMap(CityPair cityPair) {
-        showFragment(MapFragment.newInstance(cityPair), true, MapFragment.TAG);
+        showFragment(ShowMapFragment.newInstance(cityPair), true, ShowMapFragment.TAG);
     }
 
 }
